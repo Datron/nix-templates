@@ -1,36 +1,16 @@
-# in flake.nix
 {
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
+  description = "A collection of flake templates";
+
+  outputs = { self }: {
+
+    templates = {
+      rust-cf-workers = {
+        path = ./rust-cf-workers;
+        description = "template for rust based cloudflare workers";
       };
     };
+
+    templates.default = self.templates.rust-cf-workers;
+
   };
-  outputs = { self, nixpkgs, flake-utils, rust-overlay }:
-    flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          overlays = [ (import rust-overlay) ];
-          pkgs = import nixpkgs {
-            inherit system overlays;
-          };
-        in
-        with pkgs;
-        {
-          devShells.default = mkShell {
-            # 👇 we can just use `rustToolchain` here:
-            packages = with pkgs; [
-              cargo-watch
-              nodePackages.wrangler
-              rustup
-              nodejs_18
-            ];
-          };
-        }
-      );
 }
